@@ -1,0 +1,270 @@
+:root {
+  font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+  line-height: 1.4;
+  font-weight: 400;
+  color: #1c2328;
+  background-color: #f5f0e8;
+
+  --bg-1: #f5efe8;
+  --bg-2: #eef6f4;
+  --bg-3: #e7f0f6;
+  --panel: rgba(255, 255, 255, 0.9);
+  --panel-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+  --ink: #1c2328;
+  --muted: #5f6b75;
+  --accent: #1b7f6b;
+  --accent-2: #d97706;
+  --danger: #b91c1c;
+  --soft: #e8ecef;
+  --cell-size: min(36px, calc(90vw / 18));
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-image: linear-gradient(135deg, var(--bg-1), var(--bg-2) 45%, var(--bg-3)),
+    radial-gradient(circle at 10% 10%, rgba(27, 127, 107, 0.18), transparent 40%),
+    radial-gradient(circle at 90% 20%, rgba(217, 119, 6, 0.16), transparent 35%);
+  background-attachment: fixed;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 12px;
+  color: var(--accent);
+  margin: 0 0 8px 0;
+}
+
+h1 {
+  font-size: clamp(32px, 4vw, 48px);
+  margin: 0 0 8px 0;
+}
+
+.subtitle {
+  max-width: 520px;
+  color: var(--muted);
+  margin: 0;
+}
+
+.status {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  background: var(--panel);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: var(--panel-shadow);
+  min-width: 260px;
+}
+
+.status .label {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.status .value {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.status .value.ok {
+  color: var(--accent);
+}
+
+.status .value.danger {
+  color: var(--danger);
+}
+
+.status .value.solved {
+  color: var(--accent-2);
+}
+
+.board-wrap {
+  background: var(--panel);
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: var(--panel-shadow);
+  overflow: auto;
+  animation: rise 700ms ease;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(18, var(--cell-size));
+  grid-auto-rows: var(--cell-size);
+  gap: 0;
+  justify-content: center;
+}
+
+.cell {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+
+.cell:hover {
+  background: #f8fafc;
+}
+
+.cell.fixed {
+  background: #f1f5f9;
+  color: #0f172a;
+  cursor: default;
+}
+
+.cell.related {
+  background: #ecfdf3;
+}
+
+.cell.selected {
+  background: #d1fae5;
+  border-color: var(--accent);
+  transform: scale(1.02);
+}
+
+.cell.conflict {
+  background: #fee2e2;
+  border-color: #f87171;
+  color: var(--danger);
+}
+
+.cell.thick-top {
+  border-top: 2px solid #334155;
+}
+
+.cell.thick-left {
+  border-left: 2px solid #334155;
+}
+
+.cell.thick-bottom {
+  border-bottom: 2px solid #334155;
+}
+
+.cell.thick-right {
+  border-right: 2px solid #334155;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.palette {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+  gap: 10px;
+  flex: 1;
+}
+
+.palette-item {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 10px 0;
+  background: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease;
+}
+
+.palette-item:hover {
+  background: #f8fafc;
+}
+
+.palette-item.active {
+  background: #d1fae5;
+  border-color: var(--accent);
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.action {
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  padding: 10px 18px;
+  background: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease;
+}
+
+.action:hover {
+  background: #f8fafc;
+}
+
+.footer {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.mono {
+  font-family: 'IBM Plex Mono', 'Segoe UI', monospace;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 720px) {
+  .app {
+    padding: 24px 16px 40px;
+  }
+
+  .board-wrap {
+    padding: 14px;
+  }
+
+  .cell {
+    font-size: 14px;
+  }
+}
