@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-const SIDE = 18;
-const BLOCK_ROWS = 3;
-const BLOCK_COLS = 6;
+const SIDE = 25;
+const BLOCK_ROWS = 5;
+const BLOCK_COLS = 5;
 const SYMBOLS = [
   '1',
   '2',
@@ -21,7 +21,14 @@ const SYMBOLS = [
   'F',
   'G',
   'H',
-  'I'
+  'I',
+  'J',
+  'K',
+  'L',
+  'M',
+  'N',
+  'O',
+  'P'
 ];
 const SYMBOL_SET = new Set(SYMBOLS);
 const LOCK_AFTER = 3;
@@ -64,14 +71,14 @@ const makeRandomSolution = (seed) => {
   return rows.map((row) => cols.map((col) => symbols[pattern(row, col)]));
 };
 
-const makePuzzle = (solved, seed, hideRatio = 0.75) => {
+const makePuzzle = (solved, seed, hideRatio = 0.6) => {
   const rand = createRng(seed);
   return solved.map((row) => row.map((value) => (rand() < hideRatio ? '' : value)));
 };
 
 const RANDOM_SEED = Date.now();
 const SOLUTION = makeRandomSolution(RANDOM_SEED);
-const INITIAL_PUZZLE = makePuzzle(SOLUTION, RANDOM_SEED + 1, 0.75);
+const INITIAL_PUZZLE = makePuzzle(SOLUTION, RANDOM_SEED + 1, 0.6);
 const INITIAL_FIXED = INITIAL_PUZZLE.map((row) => row.map((cell) => cell !== ''));
 
 const cloneGrid = (grid) => grid.map((row) => row.slice());
@@ -235,15 +242,18 @@ export default function App() {
     () => board.reduce((count, row) => count + row.filter(Boolean).length, 0),
     [board]
   );
+  const rowHeaders = useMemo(() => range(SIDE).map((index) => index + 1), []);
+  const colHeaders = SYMBOLS;
+  const selectedSymbol = selected ? board[selected.row][selected.col] : '';
 
   return (
     <div className="app">
       <header className="header">
         <div>
-          <p className="eyebrow">18x18 Sudoku</p>
+          <p className="eyebrow">25x25 Sudoku</p>
           <h1>Granite Grid</h1>
           <p className="subtitle">
-            Blocks are 3x6. Symbols are 1-9 and A-I. Pick a cell, type, and race your
+            Blocks are 5x5. Symbols are 1-9 and A-P. Pick a cell, type, and race your
             friend later.
           </p>
         </div>
@@ -276,44 +286,77 @@ export default function App() {
       </header>
 
       <section className="board-wrap">
-        <div className="board" role="grid" aria-label="18x18 Sudoku board">
-          {board.map((row, rowIndex) =>
-            row.map((cell, colIndex) => {
-              const key = toKey(rowIndex, colIndex);
-              const isFixed = INITIAL_FIXED[rowIndex][colIndex];
-              const isSelected =
-                selected?.row === rowIndex && selected?.col === colIndex;
-              const isRelated =
-                selected &&
-                (selected.row === rowIndex ||
-                  selected.col === colIndex ||
-                  sameBlock(selected, { row: rowIndex, col: colIndex }));
-              const isConflict = mistakes.has(key);
-
-              const classes = ['cell'];
-              if (isFixed) classes.push('fixed');
-              if (isSelected) classes.push('selected');
-              if (isRelated) classes.push('related');
-              if (isConflict) classes.push('conflict');
-              if (rowIndex % BLOCK_ROWS === 0) classes.push('thick-top');
+        <div className="board-shell" role="group" aria-label="25x25 Sudoku board">
+          <div className="header-corner" aria-hidden="true" />
+          <div className="col-headers" aria-hidden="true">
+            {colHeaders.map((label, colIndex) => {
+              const classes = ['header-cell', 'header-top'];
               if (colIndex % BLOCK_COLS === 0) classes.push('thick-left');
-              if ((rowIndex + 1) % BLOCK_ROWS === 0) classes.push('thick-bottom');
               if ((colIndex + 1) % BLOCK_COLS === 0) classes.push('thick-right');
-
               return (
-                <button
-                  key={key}
-                  type="button"
-                  className={classes.join(' ')}
-                  onClick={() => setSelected({ row: rowIndex, col: colIndex })}
-                  aria-label={`Row ${rowIndex + 1}, Column ${colIndex + 1}`}
-                  aria-selected={isSelected}
-                >
-                  {cell}
-                </button>
+                <div key={`col-${label}`} className={classes.join(' ')}>
+                  {label}
+                </div>
               );
-            })
-          )}
+            })}
+          </div>
+          <div className="row-headers" aria-hidden="true">
+            {rowHeaders.map((label, rowIndex) => {
+              const classes = ['header-cell', 'header-left'];
+              if (rowIndex % BLOCK_ROWS === 0) classes.push('thick-top');
+              if ((rowIndex + 1) % BLOCK_ROWS === 0) classes.push('thick-bottom');
+              return (
+                <div key={`row-${label}`} className={classes.join(' ')}>
+                  {label}
+                </div>
+              );
+            })}
+          </div>
+          <div className="board" role="grid" aria-label="25x25 Sudoku board">
+            {board.map((row, rowIndex) =>
+              row.map((cell, colIndex) => {
+                const key = toKey(rowIndex, colIndex);
+                const isFixed = INITIAL_FIXED[rowIndex][colIndex];
+                const isSelected =
+                  selected?.row === rowIndex && selected?.col === colIndex;
+                const isRelated =
+                  selected &&
+                  (selected.row === rowIndex ||
+                    selected.col === colIndex ||
+                    sameBlock(selected, { row: rowIndex, col: colIndex }));
+                const isConflict = mistakes.has(key);
+                const isSameSymbol =
+                  selectedSymbol && cell && cell === selectedSymbol;
+                const isRelatedHighlight = isRelated || isSameSymbol;
+                const isCorrect = cell && cell === SOLUTION[rowIndex][colIndex];
+
+                const classes = ['cell'];
+                if (isFixed) classes.push('fixed');
+                if (isSelected) classes.push('selected');
+                if (isRelatedHighlight) classes.push('related');
+                if (isSameSymbol) classes.push('same-symbol');
+                if (isCorrect && !isFixed) classes.push('correct');
+                if (isConflict) classes.push('conflict');
+                if (rowIndex % BLOCK_ROWS === 0) classes.push('thick-top');
+                if (colIndex % BLOCK_COLS === 0) classes.push('thick-left');
+                if ((rowIndex + 1) % BLOCK_ROWS === 0) classes.push('thick-bottom');
+                if ((colIndex + 1) % BLOCK_COLS === 0) classes.push('thick-right');
+
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    className={classes.join(' ')}
+                    onClick={() => setSelected({ row: rowIndex, col: colIndex })}
+                    aria-label={`Row ${rowIndex + 1}, Column ${colIndex + 1}`}
+                    aria-selected={isSelected}
+                  >
+                    {cell}
+                  </button>
+                );
+              })
+            )}
+          </div>
         </div>
       </section>
 
